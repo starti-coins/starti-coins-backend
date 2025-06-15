@@ -6,11 +6,13 @@ import { TaskEmployeePerspectiveModule } from './taskEmployeePerspective/task.em
 import { TaskManagerPerspectiveModule } from './taskManagerPerspective/task.manager.perspective.module';
 import { TaskModule } from './task/task.module';
 import { CoinsModule } from './coins/coins.module';
-
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [UserModule, ManagerModule, EmployeeModule, TaskEmployeePerspectiveModule, TaskManagerPerspectiveModule, TaskModule, ManagerModule, EmployeeModule, CoinsModule],
-  controllers: [],
-  providers: [],
+  imports: [UserModule, ManagerModule, EmployeeModule, TaskEmployeePerspectiveModule, TaskManagerPerspectiveModule, TaskModule, ManagerModule, EmployeeModule, CoinsModule, AppController, AppService, PrismaModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

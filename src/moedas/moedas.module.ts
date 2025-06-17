@@ -5,4 +5,4 @@ import { Module } from "@nestjs/common";
     controllers: [],
     providers: []
 })
-export class TaskManagerPerspectiveModule {}
+export class MoedasModule {}

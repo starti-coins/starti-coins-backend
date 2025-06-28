@@ -42,7 +42,7 @@ export class UsuarioService {
         const chave = `reset_senha:${token}:${id}`;
         const valor = id;
 
-        await this.redis.set(chave, valor, 'EX', 300); //salva o reset de senha no redis por 5 minutos
+        await this.redis.set(chave, valor, 'EX', 1800); //salva o reset de senha no redis por 30 minutos
 
 
         await this.mailer.sendMail({
@@ -53,11 +53,13 @@ export class UsuarioService {
     }
 
     //adicionado o parâmetro {id} em relação ao diagrama de classes. Modificar depois
-    async redefinirSenha(id: number, token: string){
-        const verificarToken = this.redis.get(token)
+    async redefinirSenha(token: string, novaSenha: string){
+        const chaves = this.redis.keys(`reset_senha:${token}:*`);
+
+        const id = this.redis.get(chaves[0]); //alterar
 
         const salto = await bcrypt.genSalt();
-        const senhaHash = await bcrypt.hash(this.prisma.usuario.findFirst(id).senha, salto )
+        const senhaHash = await bcrypt.hash(novaSenha, salto );
 
         const usuario = await this.prisma.usuario.update({
             where: {

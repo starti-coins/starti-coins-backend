@@ -25,12 +25,12 @@ export class UsuarioController {
   @Post('reset-senha/:email')
   @HttpCode(HttpStatus.OK)
   async perdirResetSenhaEmail(@Param() email: string){
-    return this.usuarioService.enviarEmailRedefinicaoSenha;
+    return this.usuarioService.enviarEmailRedefinicaoSenha(email);
   }
 
   @Put('reset-senha/:token')
   @HttpCode(HttpStatus.OK)
-  async atualizarSenhaViaSenhaReset(@Param() token: string){
-    return this.usuarioService.redefinirSenha;
+  async atualizarSenhaViaResetSenha(@Param() token: string, novaSenha: string){
+    return this.usuarioService.redefinirSenha(token, novaSenha);
   }
 }

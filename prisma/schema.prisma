@@ -1,15 +1,82 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model colaboradores {
+  id_colaborador            Int                         @id @default(autoincrement())
+  id_usuario                Int
+  usuarios                  usuarios                    @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  tarefa_gestor_colaborador tarefa_gestor_colaborador[] @ignore
+}
+
+model gestores {
+  id_gestor                 Int                         @id @default(autoincrement())
+  id_usuario                Int
+  usuarios                  usuarios                    @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction,onUpdate: NoAction)
+  tarefa_gestor_colaborador tarefa_gestor_colaborador[] @ignore
+}
+
+model justificativas {
+  id_justificativa   Int       @id @default(autoincrement())
+  texto              String?   @default("sem justificativa")
+  data_justificativa DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Date
+  id_tarefa          Int       @unique
+  tarefas            tarefas   @relation(fields: [id_tarefa], references: [id_tarefa], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model projetos {
+  id_projeto       Int       @id @default(autoincrement())
+  nome             String    @db.VarChar(100)
+  descricao_proj   String?
+  data_finalizacao DateTime? @db.Date
+  tarefas          tarefas[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model tarefa_gestor_colaborador {
+  id_colaborador Int
+  id_gestor      Int
+  id_tarefa      Int
+  colaboradores  colaboradores @relation(fields: [id_colaborador], references: [id_colaborador], onDelete: NoAction, onUpdate: NoAction)
+  gestores       gestores      @relation(fields: [id_gestor], references: [id_gestor], onDelete: NoAction, onUpdate: NoAction)
+  tarefas        tarefas       @relation(fields: [id_tarefa], references: [id_tarefa], onDelete: NoAction, onUpdate: NoAction)
+
+  @@ignore
+}
+
+model tarefas {
+  id_tarefa                 Int                         @id @default(autoincrement())
+  titulo                    String                      @db.VarChar(100)
+  descricao                 String?
+  data_limite               DateTime                    @db.Date
+  data_atribuicao           DateTime?                   @default(dbgenerated("CURRENT_DATE")) @db.Date
+  data_envio                DateTime?                   @db.Date
+  quantidade_horas          Int?                        @default(0)
+  quantidade_moedas         Int?                        @default(0)
+  id_projeto                Int
+  status_tarefa             Boolean?                    @default(false)
+  justificativas            justificativas?
+  tarefa_gestor_colaborador tarefa_gestor_colaborador[] @ignore
+  projetos                  projetos                    @relation(fields: [id_projeto], references: [id_projeto], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model usuarios {
+  id_usuario    Int             @id @default(autoincrement())
+  nome          String          @db.VarChar(200)
+  matricula     String          @unique @db.VarChar(20)
+  cpf           String          @unique @db.VarChar(11)
+  rg            String?         @db.VarChar(20)
+  email         String          @unique @db.VarChar(126)
+  senha         String          @db.VarChar(10)
+  cargo         String          @db.VarChar(126)
+  periodo       Int?            @default(1)
+  status        Boolean?        @default(true)
+  colaboradores colaboradores[]
+  gestores      gestores[]
 }

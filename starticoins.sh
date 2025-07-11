@@ -1,13 +1,15 @@
+#!/bin/bash
+
 starticoins(){
 
     case $1 in
 
-        run)
+        -run)
             echo "Starting postgres and redis in development mode..."
             docker compose -f docker-compose.dev.yml up -d
             ;;
 
-        stop)
+        -stop)
             echo "Stopping postgres and redis in development mode..."
             docker compose -f docker-compose.dev.yml down --remove-orphans
             ;;
@@ -18,3 +20,4 @@ starticoins(){
 
     esac
 }
+starticoins "$1"

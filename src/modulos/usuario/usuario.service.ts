@@ -12,38 +12,41 @@ export class UsuarioService {
     
     constructor(
         private readonly mailer: MailerService,
-        private readonly prisma: PrismaService,
+        private prisma: PrismaService,
         private readonly redis: RedisService
     ) {}
 
     //obs: alterar depois conforme o diagrama de classes
     //atualmente utilizando conforme configuração do curso da HCode
     async enviarEmailRedefinicaoSenha(email: string){
-        const user = await this.prisma.user.findFirst({ //preciso do banco de dados de user
+        
+        const user = await this.prisma.usuarios.findUnique({
             where: {
                 email
             }
         });
 
         if (!user){
-            throw new UnauthorizedException("E-mail incorreto. ");
+            throw new NotFoundException("E-mail não encontrado. ");
         }
 
         //ciar assinatura do token (via redis)
         const token = randomBytes(8).toString('hex'); //gera uma string com 16 caracteres
-        const usuario = this.prisma.usuario.findFirst({
+        const usuario = await this.prisma.usuarios.findUnique({
             where: {
                 email: email,
-            },
+            }
         })
 
-        const id = usuario.id
+        const id = usuario?.id_usuario;
 
         const chave = `reset_senha:${token}:${id}`;
-        const valor = id;
+        const valor = id?.toString();
 
-        await this.redis.set(chave, valor, 'EX', 1800); //salva o reset de senha no redis por 30 minutos
-
+        if (valor){
+            await this.redis.set(chave, valor, 'EX', 1800); //salva o reset de senha no redis por 30 minutos
+        }
+        
 
         await this.mailer.sendMail({
             subject: 'Recuperação de senha',
@@ -56,17 +59,17 @@ export class UsuarioService {
     async redefinirSenha(token: string, novaSenha: string){
         const chaves = this.redis.keys(`reset_senha:${token}:*`);
 
-        const id = this.redis.get(chaves[0]); //alterar
+        const id = Number(this.redis.get(chaves[0])); //alterar
 
         const salto = await bcrypt.genSalt();
         const senhaHash = await bcrypt.hash(novaSenha, salto );
 
-        const usuario = await this.prisma.usuario.update({
+        const usuario = await this.prisma.usuarios.update({
             where: {
-                id,
+                id_usuario: id,
             },
             data: {
-                senhaHash
+                senha: senhaHash
             }
         });
 
@@ -82,7 +85,7 @@ export class UsuarioService {
     const hashedPassword = await bcrypt.hash(senha, saltRounds);
 
     try {
-      const newUser = await this.prisma.user.create({
+      const newUser = await this.prisma.usuarios.create({
         data: {
           ...userData, 
           senha: hashedPassword, 

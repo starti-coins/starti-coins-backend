@@ -1,15 +1,9 @@
 // src/user/dto/login-user.dto.ts
 import { IsEmail, IsNotEmpty, IsString, IsOptional, IsInt } from 'class-validator';
 
-export class LoginUserDto {
-  @IsOptional() 
+export class LoginUserDto { 
   @IsEmail()
-  email?: string; 
-
-  @IsOptional() 
-  @IsInt()
-  @IsNotEmpty() 
-  matricula?: number;
+  email: string; 
 
   @IsNotEmpty()
   @IsString()

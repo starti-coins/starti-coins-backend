@@ -13,7 +13,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsInt()
-  matricula: number;
+  matricula: string;
 
   @IsNotEmpty()
   @IsInt()

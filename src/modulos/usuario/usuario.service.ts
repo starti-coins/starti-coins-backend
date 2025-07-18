@@ -6,13 +6,15 @@ import { randomBytes } from 'crypto';
 import { CreateUserDto } from "./dto/create-user.dto";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { RedisService } from "src/config/redis";
+import { usuarios } from "@prisma/client";
+//import { usuarios } from ".prisma/client";
 
 @Injectable()
 export class UsuarioService {
     
     constructor(
         private readonly mailer: MailerService,
-        private prisma: PrismaService,
+        private readonly prisma: PrismaService,
         private readonly redis: RedisService
     ) {}
 
@@ -77,87 +79,132 @@ export class UsuarioService {
     }
 
 
+    async createUser(createUserDto: CreateUserDto): Promise<Omit<usuarios, 'senha'>> { //retorna um usuário sem senha
+        const { senha, ...userData } = createUserDto;
 
-  async createUser(createUserDto: CreateUserDto) {
-    const { senha, ...userData } = createUserDto;
+        const saltRounds = 10;
+        const defaultPassword = 'password@123'; // Senha padrão para o primeiro acesso
+        const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(senha, saltRounds);
+        try {
+            const newUser = await this.prisma.usuarios.create({
+                data: {
+                    ...userData,
+                    cargo: userData.cargo.toString(), 
+                    senha: hashedPassword, 
+                },
+            });
 
-    try {
-      const newUser = await this.prisma.usuarios.create({
-        data: {
-          ...userData, 
-          senha: hashedPassword, 
-        },
-      });
+            const { senha: _, ...userWithoutPassword } = newUser;
+            
+            await this.sendWelcomeEmail(newUser.email, newUser.nome, defaultPassword);
+            
+            return userWithoutPassword;
 
-      const { senha: _, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
-
-    } catch (error) {
-      if (error.code === 'P2002') {
-        const target = (error.meta as any)?.target || 'unknown field';
-        throw new ConflictException(`A user with this ${target} already exists.`);
-      }
-      throw error; 
+        } catch (error) {
+            if (error.code === 'P2002') {
+                const target = (error.meta as any)?.target || 'unknown field';
+                throw new ConflictException(`A user with this ${target} already exists.`);
+            }
+            throw error; 
+        }
     }
-  }
-    async realizarLogin(loginUserDto: LoginUserDto): Promise<Omit<User, 'senha'>> {
-        const { email, matricula, senha } = loginUserDto;
 
-        const MOCKED_USERS = [
-        {
-            id: 1,
-            nome: "Gestor Teste",
-            matricula: 12345,
-            periodo_atual: 8,
-            carga: "Integral",
-            cpf: "111.222.333-44",
-            rg: "12.345.678-9",
-            endereco: "Rua do Gestor, 100",
-            email: "gestor@example.com",
-            senha: "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890", 
-            role: UserRole.GESTOR, //prismaClient
-            createdAt: new Date(),
-            updatedAt: new Date()
-        },
-        {
-            id: 2,
-            nome: "Colaborador Teste",
-            matricula: 54321,
-            periodo_atual: 4,
-            carga: "Parcial",
-            cpf: "999.888.777-66",
-            rg: "98.765.432-1",
-            endereco: "Rua do Colaborador, 200",
-            email: "colaborador@example.com",
-            senha: "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890",
-            role: UserRole.COLABORADOR, //prismaClient
-            createdAt: new Date(),
-            updatedAt: new Date()
-        },
-        ];
+    async realizarLogin(loginUserDto: LoginUserDto): Promise<Omit<usuarios, 'senha'>> {
+        const { email, senha } = loginUserDto;
 
-        let foundUser: User | undefined; //prisma client
+        /*const MOCKED_USERS = [
+            {
+                id: 1,
+                nome: "Gestor Teste",
+                matricula: 12345,
+                periodo_atual: 8,
+                carga: "Integral",
+                cpf: "111.222.333-44",
+                rg: "12.345.678-9",
+                endereco: "Rua do Gestor, 100",
+                email: "gestor@example.com",
+                senha: "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890", 
+                role: UserRole.GESTOR, //prismaClient
+                createdAt: new Date(),
+                updatedAt: new Date()
+            },
+            {
+                id: 2,
+                nome: "Colaborador Teste",
+                matricula: 54321,
+                periodo_atual: 4,
+                carga: "Parcial",
+                cpf: "999.888.777-66",
+                rg: "98.765.432-1",
+                endereco: "Rua do Colaborador, 200",
+                email: "colaborador@example.com",
+                senha: "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890",
+                role: UserRole.COLABORADOR, //prismaClient
+                createdAt: new Date(),
+                updatedAt: new Date()
+            },
+        ];*/
+
+
+        let teste = await this.prisma.usuarios.findUnique({
+            where: {
+                    email: email
+                }
+        })
+        let foundUser: usuarios | null | undefined; //prisma client
 
         if (email) {
-        foundUser = MOCKED_USERS.find(user => user.email === email);
-        } else if (matricula) {
-        foundUser = MOCKED_USERS.find(user => user.matricula === matricula);
-        }
+            //foundUser = MOCKED_USERS.find(user => user.email === email);
+            foundUser = await this.prisma.usuarios.findUnique({
+                where: {
+                    email: email
+                }
+            });
+        } 
 
         if (!foundUser) {
-        throw new NotFoundException('Usuário não encontrado.');
+            throw new NotFoundException('Usuário não encontrado.');
         }
 
         const isPasswordValid = await bcrypt.compare(senha, foundUser.senha);
 
         if (!isPasswordValid) {
-        throw new UnauthorizedException('Credenciais inválidas.');
+            throw new UnauthorizedException('Credenciais inválidas.');
         }
 
         const { senha: _, ...userWithoutPassword } = foundUser;
         return userWithoutPassword;
+    }
+
+    private async sendWelcomeEmail(toEmail: string, userName: string, defaultPassword: string) {
+        const firstAccessLink = 'http://localhost:3000/primeiro-acesso'; 
+
+        try {
+            await this.mailer.sendMail({
+                from: '"StartiCoins" <noreply@starticoins.com>', 
+                to: toEmail,
+                subject: 'Bem-vindo(a) à Plataforma StartiCoins!',
+                html: `
+                    <p>Olá, ${userName}!</p>
+                    <p>Seja bem-vindo(a) à plataforma StartiCoins. Estamos muito felizes em tê-lo(a) conosco!</p>
+                    <p>Suas credenciais para o primeiro acesso são:</p>
+                    <ul>
+                        <li>**Usuário (E-mail):** ${toEmail}</li>
+                        <li>**Senha Padrão:** <strong>${defaultPassword}</strong></li>
+                    </ul>
+                    <p>Para acessar a plataforma e começar a utilizar, clique no link abaixo:</p>
+                    <p><a href="${firstAccessLink}">Acessar Plataforma StartiCoins</a></p>
+                    <p>Por favor, altere sua senha após o primeiro login para garantir a segurança da sua conta.</p>
+                    <p>Atenciosamente,</p>
+                    <p>A Equipe StartiCoins</p>
+                `,
+            });
+
+            console.log('E-mail de boas-vindas enviado para:', toEmail);
+
+        } catch (error) {
+            console.error('Erro ao enviar e-mail de boas-vindas para', toEmail, ':', error);
+        }
     }
 }

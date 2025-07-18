@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // src/user/user.controller.ts
+=======
+>>>>>>> 86e688c7af3c13e01292931075d6e079fb68fed2
 import { Controller, Post, Body, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUserDto } from './dto/create-user.dto';

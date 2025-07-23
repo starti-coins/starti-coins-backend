@@ -11,14 +11,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
         port: 587,
         auth: {
           user: 'corrine.reinger@ethereal.email',
-          pass: 'D3RVJNDJBXEad4ZZPg'
+          pass: 'D3RVJNDJBXEad4ZZPg',
         },
-    secure: false,
+        secure: false,
       },
       defaults: {
         from: '"TestEmails" <email4@gmail.com>',
-      }
-    }),  
+      },
+    }),
   ],
   controllers: [],
   providers: [],

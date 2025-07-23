@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import { PrismaService } from './prisma/prisma.service'; 
+import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,9 +9,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  const prismaService = app.get(PrismaService);
+  app.get(PrismaService);
 
   app.enableShutdownHooks();
 }
 
-bootstrap();
+void bootstrap();

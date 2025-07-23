@@ -1,13 +1,9 @@
-<<<<<<< HEAD
-// src/user/user.controller.ts
-=======
->>>>>>> 86e688c7af3c13e01292931075d6e079fb68fed2
-import { Controller, Post, Body, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Param, Put, Get, Query } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 
-@Controller('usuario') 
+@Controller('usuarios') 
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
@@ -25,9 +21,9 @@ export class UsuarioController {
     return { message: 'Login realizado com sucesso', user };
   }
 
-  @Post('reset-senha/:email')
+  @Post('reset-senha')
   @HttpCode(HttpStatus.OK)
-  async perdirResetSenhaEmail(@Param() email: string){
+  async perdirResetSenhaEmail(@Query('email') email: string){
     return this.usuarioService.enviarEmailRedefinicaoSenha(email);
   }
 

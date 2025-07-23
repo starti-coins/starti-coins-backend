@@ -1,5 +1,5 @@
 // src/user/dto/create-user.dto.ts
-import { IsString, IsEmail, IsInt, Min, IsEnum, IsNotEmpty, Max } from 'class-validator';
+import { IsString, IsEmail, IsInt, Min, IsEnum, IsNotEmpty, Max, IsBoolean } from 'class-validator';
 
 enum Cargo {
   TECH_LEAD,
@@ -12,18 +12,8 @@ export class CreateUserDto {
   nome: string;
 
   @IsNotEmpty()
-  @IsInt()
+  @IsString()
   matricula: string;
-
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
-  @Max(1)
-  periodo_atual: number;
-
-  @IsNotEmpty()
-  @IsEnum(Cargo)
-  cargo: Cargo;
 
   @IsNotEmpty()
   @IsString() 
@@ -34,14 +24,19 @@ export class CreateUserDto {
   rg: string;
 
   @IsNotEmpty()
-  @IsString()
-  endereco: string;
-
-  @IsNotEmpty()
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
-  @IsString()
-  senha: string;
+  @IsEnum(Cargo)
+  cargo: Cargo;
+
+  @IsNotEmpty()
+  @IsInt()
+  @Min(1)
+  @Max(1)
+  periodo: number;
+
+  @IsBoolean()
+  status: boolean
 }

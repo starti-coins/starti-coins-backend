@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-// src/user/user.module.ts
-=======
->>>>>>> 86e688c7af3c13e01292931075d6e079fb68fed2
 import { Module } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UsuarioController } from './usuario.controller';

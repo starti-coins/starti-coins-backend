@@ -10,20 +10,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
         host: 'smtp.ethereal.email',
         port: 587,
         auth: {
-            user: 'augusta97@ethereal.email',
-            pass: 'AU8cVmCXBaNxpbP5NF'
-        }
+          user: 'corrine.reinger@ethereal.email',
+          pass: 'D3RVJNDJBXEad4ZZPg'
+        },
+    secure: false,
       },
       defaults: {
-        from: '"nest-modules" <modules@nestjs.com>',
-      },
-      /*template: {
-        dir: __dirname + '/templates',
-        adapter: new PugAdapter(),
-        options: {
-          strict: true,
-        },
-      },*/
+        from: '"TestEmails" <email4@gmail.com>',
+      }
     }),  
   ],
   controllers: [],

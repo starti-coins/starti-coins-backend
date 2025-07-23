@@ -11,14 +11,14 @@ model colaboradores {
   id_colaborador            Int                         @id @default(autoincrement())
   id_usuario                Int
   usuarios                  usuarios                    @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  tarefa_gestor_colaborador tarefa_gestor_colaborador[] @ignore
+  tarefa_gestor_colaborador tarefa_gestor_colaborador[]
 }
 
 model gestores {
   id_gestor                 Int                         @id @default(autoincrement())
   id_usuario                Int
-  usuarios                  usuarios                    @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction,onUpdate: NoAction)
-  tarefa_gestor_colaborador tarefa_gestor_colaborador[] @ignore
+  usuarios                  usuarios                    @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  tarefa_gestor_colaborador tarefa_gestor_colaborador[]
 }
 
 model justificativas {
@@ -37,16 +37,14 @@ model projetos {
   tarefas          tarefas[]
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model tarefa_gestor_colaborador {
-  id_colaborador Int
-  id_gestor      Int
-  id_tarefa      Int
-  colaboradores  colaboradores @relation(fields: [id_colaborador], references: [id_colaborador], onDelete: NoAction, onUpdate: NoAction)
-  gestores       gestores      @relation(fields: [id_gestor], references: [id_gestor], onDelete: NoAction, onUpdate: NoAction)
-  tarefas        tarefas       @relation(fields: [id_tarefa], references: [id_tarefa], onDelete: NoAction, onUpdate: NoAction)
-
-  @@ignore
+  id_colaborador               Int
+  id_gestor                    Int
+  id_tarefa                    Int
+  id_tarefa_gestor_colaborador Int           @id @default(autoincrement())
+  colaboradores                colaboradores @relation(fields: [id_colaborador], references: [id_colaborador], onDelete: NoAction, onUpdate: NoAction)
+  gestores                     gestores      @relation(fields: [id_gestor], references: [id_gestor], onDelete: NoAction, onUpdate: NoAction)
+  tarefas                      tarefas       @relation(fields: [id_tarefa], references: [id_tarefa], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model tarefas {
@@ -61,7 +59,7 @@ model tarefas {
   id_projeto                Int
   status_tarefa             Boolean?                    @default(false)
   justificativas            justificativas?
-  tarefa_gestor_colaborador tarefa_gestor_colaborador[] @ignore
+  tarefa_gestor_colaborador tarefa_gestor_colaborador[]
   projetos                  projetos                    @relation(fields: [id_projeto], references: [id_projeto], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -73,10 +71,10 @@ model usuarios {
   cpf           String          @unique @db.VarChar(11)
   rg            String?         @db.VarChar(20)
   email         String          @unique @db.VarChar(126)
-  senha         String          @db.VarChar(10)
-  cargo         String          @db.VarChar(126)
+  senha         String          @db.VarChar(100)
   periodo       Int?            @default(1)
   status        Boolean?        @default(true)
+  cargo         String          @db.VarChar(126)
   colaboradores colaboradores[]
   gestores      gestores[]
 }

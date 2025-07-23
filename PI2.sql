@@ -48,6 +48,7 @@ CREATE TABLE tarefas (
 );
 
 CREATE TABLE tarefa_gestor_colaborador (
+    id_tarefa_gestor_colaborador serial primary key,
     id_colaborador INT NOT NULL,
     id_gestor INT NOT NULL,
     id_tarefa INT NOT NULL,

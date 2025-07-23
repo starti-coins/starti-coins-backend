@@ -7,7 +7,6 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { RedisService } from "src/config/redis";
 import { usuarios } from "@prisma/client";
-//import { usuarios } from ".prisma/client";
 
 @Injectable()
 export class UsuarioService {
@@ -15,16 +14,13 @@ export class UsuarioService {
     constructor(
         private readonly mailer: MailerService,
         private readonly prisma: PrismaService,
-        private readonly redis: RedisService
+        private readonly redis: RedisService,
     ) {}
 
-    //obs: alterar depois conforme o diagrama de classes
-    //atualmente utilizando conforme configuração do curso da HCode
     async enviarEmailRedefinicaoSenha(email: string){
-        
         const user = await this.prisma.usuarios.findUnique({
             where: {
-                email
+                email,
             }
         });
 
@@ -36,7 +32,7 @@ export class UsuarioService {
         const token = randomBytes(8).toString('hex'); //gera uma string com 16 caracteres
         const usuario = await this.prisma.usuarios.findUnique({
             where: {
-                email: email,
+                email,
             }
         })
 
@@ -48,16 +44,21 @@ export class UsuarioService {
         if (valor){
             await this.redis.set(chave, valor, 'EX', 1800); //salva o reset de senha no redis por 30 minutos
         }
-        
 
-        await this.mailer.sendMail({
+        try{
+            await this.mailer.sendMail({
+            from: '"StartiCoins" <noreply@starticoins.com>',     
             subject: 'Recuperação de senha',
-            to: 'mfs53@aluno.ifal.edu.br',
+            to: 'email4@gmail.com',
             html: `<p> Olá. Troque sua senha a partir deste token: ${token} </p>`
         })
+        } catch (error){
+            console.error('Erro ao enviar e-mail:', error);
+            throw error;
+        }
+
     }
 
-    //adicionado o parâmetro {id} em relação ao diagrama de classes. Modificar depois
     async redefinirSenha(token: string, novaSenha: string){
         const chaves = this.redis.keys(`reset_senha:${token}:*`);
 
@@ -79,11 +80,13 @@ export class UsuarioService {
     }
 
 
-    async createUser(createUserDto: CreateUserDto): Promise<Omit<usuarios, 'senha'>> { //retorna um usuário sem senha
-        const { senha, ...userData } = createUserDto;
+    async createUser(createUserDto: CreateUserDto): Promise<usuarios> { //retorna um usuário sem senha
+        const { ...userData } = createUserDto;
 
         const saltRounds = 10;
-        const defaultPassword = 'password@123'; // Senha padrão para o primeiro acesso
+        const defaultPassword = randomBytes(4).toString('hex');; //gera uma string com 8 caracteres
+        console.log('Senha padrão gerada:', defaultPassword);
+
         const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
 
         try {
@@ -94,12 +97,10 @@ export class UsuarioService {
                     senha: hashedPassword, 
                 },
             });
-
-            const { senha: _, ...userWithoutPassword } = newUser;
             
-            await this.sendWelcomeEmail(newUser.email, newUser.nome, defaultPassword);
+            await this.enviarEmailBoasVindas(newUser.email, newUser.nome, defaultPassword);
             
-            return userWithoutPassword;
+            return newUser;
 
         } catch (error) {
             if (error.code === 'P2002') {
@@ -113,49 +114,10 @@ export class UsuarioService {
     async realizarLogin(loginUserDto: LoginUserDto): Promise<Omit<usuarios, 'senha'>> {
         const { email, senha } = loginUserDto;
 
-        /*const MOCKED_USERS = [
-            {
-                id: 1,
-                nome: "Gestor Teste",
-                matricula: 12345,
-                periodo_atual: 8,
-                carga: "Integral",
-                cpf: "111.222.333-44",
-                rg: "12.345.678-9",
-                endereco: "Rua do Gestor, 100",
-                email: "gestor@example.com",
-                senha: "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890", 
-                role: UserRole.GESTOR, //prismaClient
-                createdAt: new Date(),
-                updatedAt: new Date()
-            },
-            {
-                id: 2,
-                nome: "Colaborador Teste",
-                matricula: 54321,
-                periodo_atual: 4,
-                carga: "Parcial",
-                cpf: "999.888.777-66",
-                rg: "98.765.432-1",
-                endereco: "Rua do Colaborador, 200",
-                email: "colaborador@example.com",
-                senha: "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890",
-                role: UserRole.COLABORADOR, //prismaClient
-                createdAt: new Date(),
-                updatedAt: new Date()
-            },
-        ];*/
-
-
-        let teste = await this.prisma.usuarios.findUnique({
-            where: {
-                    email: email
-                }
-        })
-        let foundUser: usuarios | null | undefined; //prisma client
+        let foundUser: usuarios | null | undefined;
 
         if (email) {
-            //foundUser = MOCKED_USERS.find(user => user.email === email);
+         
             foundUser = await this.prisma.usuarios.findUnique({
                 where: {
                     email: email
@@ -169,6 +131,8 @@ export class UsuarioService {
 
         const isPasswordValid = await bcrypt.compare(senha, foundUser.senha);
 
+        console.log(isPasswordValid)
+
         if (!isPasswordValid) {
             throw new UnauthorizedException('Credenciais inválidas.');
         }
@@ -177,7 +141,7 @@ export class UsuarioService {
         return userWithoutPassword;
     }
 
-    private async sendWelcomeEmail(toEmail: string, userName: string, defaultPassword: string) {
+    private async enviarEmailBoasVindas(toEmail: string, userName: string, defaultPassword: string) {
         const firstAccessLink = 'http://localhost:3000/primeiro-acesso'; 
 
         try {
@@ -197,7 +161,7 @@ export class UsuarioService {
                     <p><a href="${firstAccessLink}">Acessar Plataforma StartiCoins</a></p>
                     <p>Por favor, altere sua senha após o primeiro login para garantir a segurança da sua conta.</p>
                     <p>Atenciosamente,</p>
-                    <p>A Equipe StartiCoins</p>
+                    <p>Equipe StartiCoins</p>
                 `,
             });
 

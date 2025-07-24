@@ -7,6 +7,7 @@ import {
   Param,
   Put,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,15 +30,15 @@ export class UsuarioController {
     return { message: 'Login realizado com sucesso', user };
   }
 
-  @Post('reset-senha')
+  @Post('reset-senha/:email')
   @HttpCode(HttpStatus.OK)
-  async perdirResetSenhaEmail(@Query('email') email: string) {
+  async perdirResetSenhaEmail(@Param('email') email: string) {
     return this.usuarioService.enviarEmailRedefinicaoSenha(email);
   }
 
-  @Put('reset-senha/:token')
+  @Patch('reset-senha/:token')
   @HttpCode(HttpStatus.OK)
-  async atualizarSenhaViaResetSenha(@Param() token: string, novaSenha: string) {
+  async atualizarSenhaViaResetSenha(@Param('token') token: string, @Body() novaSenha: string) {
     return this.usuarioService.redefinirSenha(token, novaSenha);
   }
 }

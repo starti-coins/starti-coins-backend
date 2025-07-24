@@ -40,6 +40,10 @@ export class UsuarioService {
       },
     });
 
+    if (!usuario) {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
     const id = usuario?.id_usuario;
 
     const chave = `reset_senha:${token}:${id}`;

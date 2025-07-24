@@ -53,7 +53,7 @@ export class UsuarioService {
       await this.mailer.sendMail({
         from: '"StartiCoins" <noreply@starticoins.com>',
         subject: 'Recuperação de senha',
-        to: 'email4@gmail.com',
+        to: user.email,
         html: `<p> Olá. Troque sua senha a partir deste token: ${token} </p>`,
       });
     } catch (error) {

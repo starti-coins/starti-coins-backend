@@ -37,7 +37,10 @@ export class UsuarioController {
 
   @Put('reset-senha/:token')
   @HttpCode(HttpStatus.OK)
-  async atualizarSenhaViaResetSenha(@Param() token: string, novaSenha: string) {
+  async atualizarSenhaViaResetSenha(
+    @Param('token') token: string,
+    @Body('novaSenha') novaSenha: string,
+  ) {
     return this.usuarioService.redefinirSenha(token, novaSenha);
   }
 }

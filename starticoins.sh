@@ -15,7 +15,7 @@ starticoins(){
             ;;
 
         *)
-            echo "Comando inválido! Use: run, stop"
+            echo "Comando inválido! Use: -run, -stop"
             ;;
 
     esac

@@ -7,10 +7,12 @@ import {
   Param,
   Put,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -42,5 +44,26 @@ export class UsuarioController {
     @Body('novaSenha') novaSenha: string,
   ) {
     return this.usuarioService.redefinirSenha(token, novaSenha);
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const userId = parseInt(id, 10);
+    if (isNaN(userId)) {
+      throw new BadRequestException('ID do usuário deve ser um número válido.');
+    }
+
+    const updatedUser = await this.usuarioService.updateUser(
+      userId,
+      updateUserDto,
+    );
+    return {
+      message: 'Usuário atualizado com sucesso',
+      user: updatedUser,
+    };
   }
 }

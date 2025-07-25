@@ -29,14 +29,6 @@ model justificativas {
   tarefas            tarefas   @relation(fields: [id_tarefa], references: [id_tarefa], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model projetos {
-  id_projeto       Int       @id @default(autoincrement())
-  nome             String    @db.VarChar(100)
-  descricao_proj   String?
-  data_finalizacao DateTime? @db.Date
-  tarefas          tarefas[]
-}
-
 model tarefa_gestor_colaborador {
   id_colaborador               Int
   id_gestor                    Int
@@ -51,16 +43,15 @@ model tarefas {
   id_tarefa                 Int                         @id @default(autoincrement())
   titulo                    String                      @db.VarChar(100)
   descricao                 String?
+  id_colaborador            Int
   data_limite               DateTime                    @db.Date
   data_atribuicao           DateTime?                   @default(dbgenerated("CURRENT_DATE")) @db.Date
   data_envio                DateTime?                   @db.Date
   quantidade_horas          Int?                        @default(0)
   quantidade_moedas         Int?                        @default(0)
-  id_projeto                Int
   status_tarefa             Boolean?                    @default(false)
   justificativas            justificativas?
   tarefa_gestor_colaborador tarefa_gestor_colaborador[]
-  projetos                  projetos                    @relation(fields: [id_projeto], references: [id_projeto], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

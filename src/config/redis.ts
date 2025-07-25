@@ -2,16 +2,18 @@ import Redis from 'ioredis';
 
 export class RedisService extends Redis {
   constructor() {
-    const redisConfig = {
+    /*const redisConfig = {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
       retryDelayOnFailover: 100,
       enableReadyCheck: false,
       maxRetriesPerRequest: null,
-    };
+    };*/
+    const host = process.env.REDIS_HOST || 'localhost';
+    const port = parseInt(process.env.REDIS_PORT || '6379');
 
-    super(redisConfig);
+    super(port, host);
 
     super.on('error', (err) => {
       console.log('Erro no Redis.');

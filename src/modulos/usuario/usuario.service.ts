@@ -1,5 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer/dist';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -49,15 +50,19 @@ export class UsuarioService {
     const chave = `reset_senha:${token}:${id}`;
     const valor = id?.toString();
 
+    console.log('id: ', id);
+    console.log('chave: ', chave);
+    console.log('valor: ', valor);
+
     if (valor) {
-      await this.redis.set(chave, valor, 'EX', 1800); //salva o reset de senha no redis por 30 minutos
+      await this.redis.set(chave, valor, 'EX', 300); //salva o reset de senha no redis por 5 minutos
     }
 
     try {
       await this.mailer.sendMail({
         from: '"StartiCoins" <noreply@starticoins.com>',
         subject: 'Recuperação de senha',
-        to: 'email4@gmail.com',
+        to: user.email,
         html: `<p> Olá. Troque sua senha a partir deste token: ${token} </p>`,
       });
     } catch (error) {
@@ -67,21 +72,29 @@ export class UsuarioService {
   }
 
   async redefinirSenha(token: string, novaSenha: string) {
-    const chaves = await this.redis.keys(`reset_senha:${token}:*`);
+    try{
+      const chaves = await this.redis.keys(`reset_senha:${token}:*`);
 
-    const id = Number(await this.redis.get(chaves[0])); //alterar
+      const id = Number(await this.redis.get(chaves[0]));
 
-    const salto = await bcrypt.genSalt();
-    const senhaHash = await bcrypt.hash(novaSenha, salto);
+      const quantidadeSaltos = 10;
+      const senhaHash = await bcrypt.hash(novaSenha, quantidadeSaltos);
 
-    await this.prisma.usuarios.update({
-      where: {
-        id_usuario: id,
-      },
-      data: {
-        senha: senhaHash,
-      },
-    });
+      
+        await this.prisma.usuarios.update({
+        where: {
+          id_usuario: id,
+        },
+        data: {
+          senha: senhaHash,
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar a senha:', error);
+      throw new BadRequestException('Token inválido ou expirado.');
+    }
+
+    //this.redis.del(`reset_senha:${token}:${id}`);
 
     return true;
   }

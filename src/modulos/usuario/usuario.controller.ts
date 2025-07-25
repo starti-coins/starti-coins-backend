@@ -5,8 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Put,
-  Query,
   Patch,
 } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
@@ -38,7 +36,10 @@ export class UsuarioController {
 
   @Patch('reset-senha/:token')
   @HttpCode(HttpStatus.OK)
-  async atualizarSenhaViaResetSenha(@Param('token') token: string, @Body() novaSenha: string) {
+  async atualizarSenhaViaResetSenha(
+    @Param('token') token: string,
+    @Body('senha') novaSenha: string,
+  ) {
     return this.usuarioService.redefinirSenha(token, novaSenha);
   }
 }

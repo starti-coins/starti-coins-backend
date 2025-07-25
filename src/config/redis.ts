@@ -13,7 +13,9 @@ export class RedisService extends Redis {
     const host = process.env.REDIS_HOST || 'localhost';
     const port = parseInt(process.env.REDIS_PORT || '6379');
 
-    super(port, host);
+    super(port, host, {
+      password: process.env.REDIS_PASSWORD,
+    });
 
     super.on('error', (err) => {
       console.log('Erro no Redis.');

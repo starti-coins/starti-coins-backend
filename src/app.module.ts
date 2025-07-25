@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { UsuarioModule } from './modulos/usuario/usuario.module';
+import { TarefaModule } from './modulos/tarefa/tarefa.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
     UsuarioModule,
+    TarefaModule,
     MailerModule.forRoot({
       transport: {
         host: 'smtp.ethereal.email',

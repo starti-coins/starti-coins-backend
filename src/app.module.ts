@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UsuarioModule } from './modulos/usuario/usuario.module';
+import { TarefaModule } from './modulos/tarefa/tarefa.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TarefaModule } from './modulos/tarefa/tarefa.module';
 

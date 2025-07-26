@@ -43,7 +43,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsInt()
   @Min(1)
-  @Max(1)
+  @Max(8)
   periodo: number;
 
   @IsBoolean()

@@ -14,21 +14,12 @@ export class TarefaService {
             data: {
                 titulo: taskData.titulo,
                 descricao: taskData.descricao,
-                id_colaborador: taskData.id_colaborador,
                 data_limite: taskData.data_limite,
                 data_atribuicao: taskData.dataAtribuicao,
                 quantidade_horas: taskData.quantidadeHoras,
                 quantidade_moedas: taskData.quantidadeMoedas
-
             },
         });
-            const tarefa_gestor_colaborador = await this.prisma.tarefa_gestor_colaborador.create({
-                data: {
-                    id_tarefa: tarefa.id_tarefa,
-                    id_gestor: 0,
-                    id_colaborador: tarefa.id_colaborador,
-                }
-            });
             return tarefa;
         }
         catch (error){

@@ -43,18 +43,17 @@ model tarefas {
   id_tarefa                 Int                         @id @default(autoincrement())
   titulo                    String                      @db.VarChar(100)
   descricao                 String?
-  id_colaborador            Int
   data_limite               DateTime                    @db.Date
   data_atribuicao           DateTime?                   @default(dbgenerated("CURRENT_DATE")) @db.Date
   data_envio                DateTime?                   @db.Date
   quantidade_horas          Int?                        @default(0)
   quantidade_moedas         Int?                        @default(0)
   status_tarefa             Boolean?                    @default(false)
+  id_colaborador            Int?
   justificativas            justificativas?
   tarefa_gestor_colaborador tarefa_gestor_colaborador[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model usuarios {
   id_usuario    Int             @id @default(autoincrement())
   nome          String          @db.VarChar(200)
@@ -63,9 +62,9 @@ model usuarios {
   rg            String?         @db.VarChar(20)
   email         String          @unique @db.VarChar(126)
   senha         String          @db.VarChar(100)
+  cargo         String          @db.VarChar(126)
   periodo       Int?            @default(1)
   status        Boolean?        @default(true)
-  cargo         String          @db.VarChar(126)
   colaboradores colaboradores[]
   gestores      gestores[]
 }

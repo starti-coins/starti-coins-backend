@@ -118,6 +118,20 @@ export class UsuarioService {
         },
       });
 
+      if (newUser.cargo == 'COLABORADOR') {
+        await this.prisma.colaboradores.create({
+          data: {
+            id_usuario: newUser.id_usuario,
+          }
+        });
+      } else if (newUser.cargo == 'TECH_LEAD') {
+        await this.prisma.gestores.create({
+          data: {
+            id_usuario: newUser.id_usuario,
+          }
+        });
+      }
+
       await this.enviarEmailBoasVindas(
         newUser.email,
         newUser.nome,

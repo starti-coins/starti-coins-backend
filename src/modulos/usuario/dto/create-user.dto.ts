@@ -1,47 +1,51 @@
 // src/user/dto/create-user.dto.ts
-import { IsString, IsEmail, IsInt, Min, IsEnum, IsNotEmpty } from 'class-validator';
-import { UserRole } from '@prisma/client'; 
+import {
+  IsString,
+  IsEmail,
+  IsInt,
+  Min,
+  IsEnum,
+  IsNotEmpty,
+  Max,
+  IsBoolean,
+} from 'class-validator';
 
+enum Cargo {
+  TECH_LEAD,
+  GESTOR_RH,
+  COLABORADOR,
+}
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   nome: string;
 
   @IsNotEmpty()
-  @IsInt()
-  @Min(1)
-  matricula: number;
-
-  @IsNotEmpty()
-  @IsInt()
-  @Min(1)
-  periodo_atual: number;
+  @IsString()
+  matricula: string;
 
   @IsNotEmpty()
   @IsString()
-  carga: string;
-
-  @IsNotEmpty()
-  @IsString() 
   cpf: string;
 
   @IsNotEmpty()
-  @IsString() 
-  rg: string;
-
-  @IsNotEmpty()
   @IsString()
-  endereco: string;
+  rg: string;
 
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
-  @IsString()
-  senha: string;
+  @IsEnum(Cargo)
+  cargo: Cargo;
 
   @IsNotEmpty()
-  @IsEnum(UserRole) 
-  role: UserRole;  //é o mesmo que o cargo?
+  @IsInt()
+  @Min(1)
+  @Max(8)
+  periodo: number;
+
+  @IsBoolean()
+  status: boolean;
 }

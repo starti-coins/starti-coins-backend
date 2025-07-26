@@ -1,21 +1,35 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaService } from './prisma/prisma.service';
+import Redis from 'ioredis';
 
 async function bootstrap() {
-  const redis = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-    transport: Transport.REDIS,
-    options: {
-      host: 'localhost',
-      port: 6379,
-    },
+  const app = await NestFactory.create(AppModule);
+
+  // Habilitar CORS
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
 
-  const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+
+  app.get(PrismaService);
+
+  app.enableShutdownHooks();
+
   await app.listen(process.env.PORT ?? 3000);
 
-}
-bootstrap();
+  /*const redis = new Redis(6379,'localhost'); // Default port is 6379
 
+    redis.set("reset_teste", "teste");
+    redis.get("reset_teste", (err, result) => {
+      // `result` should be "bar"
+      console.log(err, result);
+    });*/
+}
+
+void bootstrap();

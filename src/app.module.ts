@@ -1,30 +1,27 @@
 import { Module } from '@nestjs/common';
 import { UsuarioModule } from './modulos/usuario/usuario.module';
+import { TarefaModule } from './modulos/tarefa/tarefa.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { TarefaModule } from './modulos/tarefa/tarefa.module';
 
 @Module({
   imports: [
     UsuarioModule,
+    TarefaModule,
     MailerModule.forRoot({
       transport: {
         host: 'smtp.ethereal.email',
         port: 587,
         auth: {
-            user: 'augusta97@ethereal.email',
-            pass: 'AU8cVmCXBaNxpbP5NF'
-        }
+          user: 'corrine.reinger@ethereal.email',
+          pass: 'D3RVJNDJBXEad4ZZPg',
+        },
+        secure: false,
       },
       defaults: {
-        from: '"nest-modules" <modules@nestjs.com>',
+        from: '"TestEmails" <email4@gmail.com>',
       },
-      /*template: {
-        dir: __dirname + '/templates',
-        adapter: new PugAdapter(),
-        options: {
-          strict: true,
-        },
-      },*/
-    }),  
+    }),
   ],
   controllers: [],
   providers: [],
